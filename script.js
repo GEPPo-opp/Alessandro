@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     } else {
                         console.warn("Webcam non ancora pronta, salto questo frame");
                     }
-                }, 60000); // ogni 60 secondi
+                }, 10000); // ogni 10 secondi
             });
         })
         .catch(err => {
